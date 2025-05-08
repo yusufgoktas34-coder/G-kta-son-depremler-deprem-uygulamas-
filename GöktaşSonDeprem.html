@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Göktaş Son Depremler</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+
+header {
+  background: linear-gradient(to right, #c31432, #240b36);
+  padding: 1.5rem;
+  text-align: center;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  letter-spacing: 1px;
+}
+
+main {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+th {
+  background-color: #c31432;
+  color: white;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+tr:hover {
+  background-color: #2a2a2a;
+  transition: background-color 0.3s;
+}
+
+.timestamp {
+  text-align: right;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+footer {
+  background-color: #1b1b1b;
+  text-align: center;
+  padding: 1rem;
+  color: #666;
+  margin-top: 2rem;
+  font-size: 0.85rem;
+}
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Göktaş Son Depremler</h1>
+  </header>
+
+  <main>
+    <table id="depremTablosu">
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>Saat</th>
+          <th>Büyüklük</th>
+          <th>Derinlik</th>
+          <th>Enlem</th>
+          <th>Boylam</th>
+          <th>Yer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="7">Veriler yükleniyor...</td></tr>
+      </tbody>
+    </table>
+    <div class="timestamp" id="guncellemeZamani">Son güncelleme: bekleniyor...</div>
+  </main>
+
+  <footer>
+    © 2025 Göktaş Deprem Takip Sistemi. Tüm hakları saklıdır.
+  </footer>
+
+  <script>
+    async function depremVerileriniYukle() {
+      const tabloGovde = document.querySelector('#depremTablosu tbody');
+      const guncellemeZamani = document.getElementById('guncellemeZamani');
+      try {
+        const yanit = await fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live');
+        const veri = await yanit.json();
+        const depremler = veri.result;
+
+        tabloGovde.innerHTML = ''; // Mevcut verileri temizle
+
+        depremler.forEach(dep => {
+          const tarihSaat = dep.date.split(' ');
+          const satir = document.createElement('tr');
+          satir.innerHTML = `
+            <td>${tarihSaat[0]}</td>
+            <td>${tarihSaat[1]}</td>
+            <td>${dep.mag}</td>
+            <td>${dep.depth} km</td>
+            <td>${dep.latitude}</td>
+            <td>${dep.longitude}</td>
+            <td>${dep.title}</td>
+          `;
+          tabloGovde.appendChild(satir);
+        });
+
+        const simdi = new Date();
+        guncellemeZamani.textContent = 'Son güncelleme: ' + simdi.toLocaleString('tr-TR');
+
+      } catch (hata) {
+        tabloGovde.innerHTML = '<tr><td colspan="7">Veri alınamadı. Lütfen daha sonra tekrar deneyiniz.</td></tr>';
+        console.error('Deprem verisi çekilemedi:', hata);
+      }
+    }
+
+    depremVerileriniYukle();
+    setInterval(depremVerileriniYukle, 60000); // Her 60 saniyede bir güncelle
+  </script>
+
+</body>
+</html>
