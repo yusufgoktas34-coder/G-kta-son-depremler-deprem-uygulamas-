@@ -1,0 +1,1 @@
+# G-kta-son-depremler-deprem-uygulamas-
